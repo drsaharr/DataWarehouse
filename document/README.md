@@ -224,7 +224,7 @@ Run the validation queries under `sql/quality` to confirm data integrity.
 
 ## 👤 Maintainers
 
-**Reza Afkhamnia** — Data Warehouse Developer & BI Developer
+**sahar teimouri** — Data Warehouse Developer & BI Developer
 
 
 
