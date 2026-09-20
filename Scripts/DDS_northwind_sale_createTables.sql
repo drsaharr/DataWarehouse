@@ -74,7 +74,6 @@ BEGIN
     CREATE TABLE sale.dim_geography
     (
         geography_key       INT IDENTITY(1,1) NOT NULL,
-		--khodam sk gozashtam va bk nadare (khode dw tolid mikone )
         country             NVARCHAR(100)     NOT NULL,
         region              NVARCHAR(100)     NOT NULL,
         city                NVARCHAR(100)     NOT NULL,
@@ -87,7 +86,7 @@ BEGIN
 
         CONSTRAINT uq_dim_geography_location
             UNIQUE (country, region, city, postal_code)
-			--bk mishe in 4 ta (khodam jadval ro keshidam biron ke bk nadare)
+		
     );
 END;
 GO
@@ -111,16 +110,14 @@ BEGIN
         fax                 NVARCHAR(50)      NOT NULL,
 		geography_key           INT               NULL,
         dwh_inserted_at     DATETIME2(3)      NOT NULL
-		--lahzee ke data miad to in  rekord ro dare   sabt mikone(male khodamme dw na source)
+
             CONSTRAINT df_dim_customer_dwh_inserted_at
             DEFAULT (SYSUTCDATETIME()),
 
         CONSTRAINT pk_dim_customer PRIMARY KEY (customer_key),
-		-- pk dim mishe sk
+		
         CONSTRAINT uq_dim_customer_customer_id UNIQUE (customer_id),
-		--ro ye bs key unique constraint gozashtam
-		-- dim ha bayad ye sotone pk dashte bashan
-		--barae afzayesh sorat,agar ye soton history bod in khat akhari ro nabayad mizashtam chon bs tekrar mishe 
+		 
 		   CONSTRAINT fk_dim_customer_geography
             FOREIGN KEY (geography_key)
             REFERENCES sale.dim_geography(geography_key)
@@ -277,12 +274,12 @@ BEGIN
     CREATE TABLE sale.fact_order
     (
         order_fact_key          BIGINT IDENTITY(1,1) NOT NULL,
-		--pk mishe khodam neveshtam
+		
 
         -- Business / Degenerate Keys
         order_id                INT                   NOT NULL,
         source_product_id       INT                   NOT NULL,
-		--bk mishe ,jadval order va order detail (khode order detail har radifesh shamel product+orderid)
+		
 
         -- Dimension Surrogate Keys
         customer_key            INT                   NOT NULL,
@@ -313,7 +310,7 @@ BEGIN
         discount_amount         DECIMAL(19,4)         NOT NULL,
         net_amount              DECIMAL(19,4)         NOT NULL,
         freight_amount          DECIMAL(19,4)         NOT NULL,
-		--khodemon ezafe kardim
+		
 
         dwh_inserted_at         DATETIME2(3)          NOT NULL
             CONSTRAINT df_fact_order_dwh_inserted_at
