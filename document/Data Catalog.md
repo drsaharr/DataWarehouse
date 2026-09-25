@@ -1,7 +1,7 @@
 
 # Data Catalog — Sales ETL / Data Warehouse Project
 
-**Owner:** Reza Afkhamnia 
+**Owner:** Sahar Teimouri 
 **Role:** Data Warehouse Developer
 **Platform:** Microsoft SQL Server  
 **Language:** T-SQL  
@@ -589,7 +589,7 @@ Any structural or business change must be reflected in this catalog.
 
 | Version | Date | Author | Notes |
 |---|---|---|---|
-| `1.0.0` | `2026-08-10` | Reza Afkhamnia | Initial Data Catalog for Sales ETL / Data Warehouse project |
+| `1.0.0` | `2026-08-10` | Sahar Teimouri  | Initial Data Catalog for Sales ETL / Data Warehouse project |
 
 ---
 
@@ -601,6 +601,6 @@ Any modification to the ETL pipeline, warehouse schema, business logic, or repor
 
 ---
 
-**Maintained by:** Reza Afkhamnia  
+**Maintained by:** Sahar Teimouri 
 **Format:** Markdown (`.md`)  
 **Repository Use:** GitHub Documentation
