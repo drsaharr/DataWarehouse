@@ -163,9 +163,6 @@ END CATCH;
 
 ### 1. Clone the repository
 
-```bash
-git clone https://github.com/hossein-khajvand/northwind_DW.git
-cd northwind_DW
 ```
 
 ### 2. Prepare Source Database
