@@ -1,24 +1,24 @@
-# Sales ETL & Data Warehouse â€” GitHub README
+# Sales ETL & Data Warehouse — GitHub README
 
 <div align="center">
 
 **A modern SQL Server Data Warehouse project for Sales Analytics**
 
-_T-SQL â€¢ Star Schema â€¢ Dimensionâ€“Fact Architecture â€¢ Full Load ETL_
+_T-SQL • Star Schema • Dimension–Fact Architecture • Full Load ETL_
 
 </div>
 
 ---
 
-## ðŸ“Œ Overview
+## 📌 Overview
 
 This repository contains the complete source code and documentation for a **Sales Data Warehouse** built on **Microsoft SQL Server**.
 
-The project implements a clean **Staging â†’ Dimension â†’ Fact** architecture with a denormalized star schema, enabling reliable, auditable, and analytics-ready sales reporting for BI tools such as Power BI and Grafana.
+The project implements a clean **Staging → Dimension → Fact** architecture with a denormalized star schema, enabling reliable, auditable, and analytics-ready sales reporting for BI tools such as Power BI and Grafana.
 
 ---
 
-## ðŸ—‚ï¸ Repo Contents
+## 🗂️ Repo Contents
 
 | Path | Description |
 |---|---|
@@ -30,48 +30,48 @@ The project implements a clean **Staging â†’ Dimension â†’ Fact** arch
 
 ```
 .
-â”œâ”€â”€ sql
-â”‚   â”œâ”€â”€ schema/          # DDL for stg, dim, fact, etl layers
-â”‚   â”œâ”€â”€ etl/             # ETL stored procedures (full load)
-â”‚   â””â”€â”€ quality/         # Data quality & validation queries
-â”œâ”€â”€ data-catalog/        # DATA_CATALOG.md
-â”œâ”€â”€ docs/                # Architecture & design documentation
-â””â”€â”€ README.md
+├── sql
+│   ├── schema/          # DDL for stg, dim, fact, etl layers
+│   ├── etl/             # ETL stored procedures (full load)
+│   └── quality/         # Data quality & validation queries
+├── data-catalog/        # DATA_CATALOG.md
+├── docs/                # Architecture & design documentation
+└── README.md
 ```
 
 ---
 
-## ðŸ—ï¸ Architecture
+## 🏗️ Architecture
 
 The warehouse follows a classic layered design:
 
 ```
 Source Systems
-      â”‚
-      â–¼
-  [stg] Staging Layer        â†’ Raw ingestion, minimal transformation
-      â”‚
-      â–¼
-  [dim] Dimension Layer      â†’ Business entities (Product, Customer, Date)
-      â”‚
-      â–¼
-  [fact] Fact Layer          â†’ Measurable transactions (Sales)
-      â”‚
-      â–¼
+      │
+      ▼
+  [stg] Staging Layer        → Raw ingestion, minimal transformation
+      │
+      ▼
+  [dim] Dimension Layer      → Business entities (Product, Customer, Date)
+      │
+      ▼
+  [fact] Fact Layer          → Measurable transactions (Sales)
+      │
+      ▼
     BI / Reporting
 ```
 
 ### Key Design Decisions
 
-- **Denormalized Star Schema** â€” the `Product` dimension includes category attributes directly, reducing required joins.
-- **Full Load ETL** â€” dimensions and facts are rebuilt on each run for a consistent, reproducible state.
-- **Surrogate Keys** â€” every dimension has a dedicated integer key (`ProductKey`, `CustomerKey`, etc.).
-- **Unknown Members** â€” missing lookups map to surrogate key `0` to preserve referential integrity.
-- **Atomic Transactions** â€” all ETL runs under transactional control with error handling.
+- **Denormalized Star Schema** — the `Product` dimension includes category attributes directly, reducing required joins.
+- **Full Load ETL** — dimensions and facts are rebuilt on each run for a consistent, reproducible state.
+- **Surrogate Keys** — every dimension has a dedicated integer key (`ProductKey`, `CustomerKey`, etc.).
+- **Unknown Members** — missing lookups map to surrogate key `0` to preserve referential integrity.
+- **Atomic Transactions** — all ETL runs under transactional control with error handling.
 
 ---
 
-## ðŸ§± Schema Layers
+## 🧱 Schema Layers
 
 | Schema | Type | Responsibility |
 |---|---|---|
@@ -82,25 +82,25 @@ Source Systems
 
 ---
 
-## ðŸ“š Core Tables
+## 📚 Core Tables
 
 ### Dimensions
 
-- **`dim.Product`** â€” product attributes, including denormalized category and brand.
-- **`dim.Customer`** â€” customer attributes and location.
-- **`dim.Date`** â€” reusable calendar dimension.
+- **`dim.Product`** — product attributes, including denormalized category and brand.
+- **`dim.Customer`** — customer attributes and location.
+- **`dim.Date`** — reusable calendar dimension.
 
 ### Fact
 
-- **`fact.Sales`** â€” grain is one row per order line, with quantity, price, and amount calculations.
+- **`fact.Sales`** — grain is one row per order line, with quantity, price, and amount calculations.
 
 ### Staging
 
-- **`stg.SalesOrder`**, `stg.Customer`, `stg.Product` â€” raw source snapshots.
+- **`stg.SalesOrder`**, `stg.Customer`, `stg.Product` — raw source snapshots.
 
 ---
 
-## ðŸ”§ ETL Pipeline
+## 🔧 ETL Pipeline
 
 ### Load Sequence
 
@@ -141,7 +141,7 @@ END CATCH;
 
 ---
 
-## ðŸ“Š KPI Examples
+## 📊 KPI Examples
 
 | KPI | Formula |
 |---|---|
@@ -153,7 +153,7 @@ END CATCH;
 
 ---
 
-## âœ… Data Quality
+## ✅ Data Quality
 
 The pipeline includes validation queries for:
 
@@ -165,7 +165,7 @@ The pipeline includes validation queries for:
 
 ---
 
-## ðŸ§° Prerequisites
+## 🧰 Prerequisites
 
 - **Microsoft SQL Server** (2019+ recommended)
 - SQL Server Management Studio (or equivalent)
@@ -173,7 +173,7 @@ The pipeline includes validation queries for:
 
 ---
 
-## ðŸš€ Getting Started
+## 🚀 Getting Started
 
 ### 1. Clone the repository
 
@@ -203,7 +203,7 @@ Run the validation queries under `sql/quality` to confirm data integrity.
 
 ---
 
-## ðŸ“– Documentation
+## 📖 Documentation
 
 | Document | Purpose |
 |---|---|
@@ -211,7 +211,7 @@ Run the validation queries under `sql/quality` to confirm data integrity.
 
 ---
 
-## ðŸ› ï¸ Roadmap
+## 🛠️ Roadmap
 
 - [ ] Add incremental load support for large-volume tables
 - [ ] Introduce Slowly Changing Dimension (SCD) Type 2 for history
@@ -221,7 +221,10 @@ Run the validation queries under `sql/quality` to confirm data integrity.
 
 ---
 
-## ðŸ‘¤ Maintainers
+## 👤 Maintainers
 
-**sahar teimouri** ” Data analyst & Data scientist 
+**sahar teimouri** — Data analyst & Data scientist 
+
+
+
 
