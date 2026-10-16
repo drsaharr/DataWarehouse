@@ -1,114 +1,115 @@
-# Sales ETL & Data Warehouse — Northwind DW
+# Sales ETL & Data Warehouse â€” GitHub README
 
 <div align="center">
 
 **A modern SQL Server Data Warehouse project for Sales Analytics**
 
-_T-SQL • Star/Snowflake Architecture • Dimension–Fact Modeling • Full Load ETL_
+_T-SQL â€¢ Star Schema â€¢ Dimensionâ€“Fact Architecture â€¢ Full Load ETL_
 
 </div>
 
 ---
 
-## 📌 Overview
+## ðŸ“Œ Overview
 
-This repository contains the complete source code and documentation for an enterprise-ready **Sales Data Warehouse** built on **Microsoft SQL Server** using the Northwind dataset.
+This repository contains the complete source code and documentation for a **Sales Data Warehouse** built on **Microsoft SQL Server**.
 
-The project implements an auditable **Staging → Dimension → Fact** pipeline with a rich dimensional model (including Outrigger Geographies and a Shared Persian/Gregorian Date Dimension), optimized for analytical workloads, OLAP reporting, and BI tools such as Power BI.
+The project implements a clean **Staging â†’ Dimension â†’ Fact** architecture with a denormalized star schema, enabling reliable, auditable, and analytics-ready sales reporting for BI tools such as Power BI and Grafana.
 
 ---
 
-## 🗂️ Repo Contents
+## ðŸ—‚ï¸ Repo Contents
 
 | Path | Description |
 |---|---|
-| `scripts/` | Database DDL, staging tables, and ETL stored procedures |
-| `dataset/` | Source database initialization files |
-| `documents/` | Architecture blueprints, Data Flow diagrams, and Data Catalog |
+| `sql/schema` | Database, schema, and table creation scripts (DDL) |
+| `sql/etl` | Stored procedures for ETL loading |
+| `sql/quality` | Data quality and validation queries |
+| `data-catalog/` | Operational and business metadata documentation |
+| `docs/` | Supplemental design and architecture notes |
 
-```text
+```
 .
-├── dataset/             # Source data initialization scripts
-├── documents/           # Architecture diagrams, Blueprint & Data Catalog
-├── scripts/             # DDL & ETL Stored Procedures
-└── README.md
+â”œâ”€â”€ sql
+â”‚   â”œâ”€â”€ schema/          # DDL for stg, dim, fact, etl layers
+â”‚   â”œâ”€â”€ etl/             # ETL stored procedures (full load)
+â”‚   â””â”€â”€ quality/         # Data quality & validation queries
+â”œâ”€â”€ data-catalog/        # DATA_CATALOG.md
+â”œâ”€â”€ docs/                # Architecture & design documentation
+â””â”€â”€ README.md
 ```
 
 ---
 
-## 🏗️ Architecture & Blueprint
+## ðŸ—ï¸ Architecture
 
-The architecture is derived directly from the **Architecture Blueprint**, linking dimensional hierarchies and outriggers:
+The warehouse follows a classic layered design:
 
-```text
-       [Dim_Geography]
-        ▲     ▲     ▲
-        │     │     │ (FK: geography_key)
-        │     │  [Dim_Supplier]
-        │     │     ▲
-        │     │     │ (FK: supplier_key)
-[Dim_Customer]│  [Dim_Product]   [Dim_Employee]   [Dim_Shipper]   [Dim_Date (Shared)]
-       │      │        │                │               │          (3 Date Roles)
-       │      └────────┼────────────────┼───────────────┼─────────────────┘
-       ▼               ▼                ▼               ▼
- ┌────────────────────────────────────────────────────────────────────────┐
- │                              Fact_Order                                │
- │ (Grain: One row per Order ID + Product ID)                             │
- │ Keys: product_key, customer_key, employee_key, shipper_key, date_keys  │
- │ Measures: quantity, unit_price, discount_amount, freight, total_amount │
- └────────────────────────────────────────────────────────────────────────┘
+```
+Source Systems
+      â”‚
+      â–¼
+  [stg] Staging Layer        â†’ Raw ingestion, minimal transformation
+      â”‚
+      â–¼
+  [dim] Dimension Layer      â†’ Business entities (Product, Customer, Date)
+      â”‚
+      â–¼
+  [fact] Fact Layer          â†’ Measurable transactions (Sales)
+      â”‚
+      â–¼
+    BI / Reporting
 ```
 
 ### Key Design Decisions
 
-- **Shared Date Dimension (`Dim_Date`)** — Supports dual Gregorian (`MiladiDate`) and Solar Hijri (`ShamsiDate`) calendars, serving role-playing dates: `OrderDate`, `RequiredDate`, and `ShippedDate`.
-- **Outrigger Geography Hierarchy** — Normalized `Dim_Geography` dimension referenced directly by Customer, Employee, and Supplier entities.
-- **Supplier-to-Product Outrigger** — Products maintain reference to their corresponding suppliers via `supplier_key`.
-- **Surrogate Keys & Default Unknown Members** — All dimensions utilize auto-incrementing integer keys; unmatched lookups default to surrogate key `0`.
-- **Transactional ETL Control** — ETL stored procedures employ `XACT_ABORT ON` and atomic `TRY...CATCH` blocks with rollback protection.
+- **Denormalized Star Schema** â€” the `Product` dimension includes category attributes directly, reducing required joins.
+- **Full Load ETL** â€” dimensions and facts are rebuilt on each run for a consistent, reproducible state.
+- **Surrogate Keys** â€” every dimension has a dedicated integer key (`ProductKey`, `CustomerKey`, etc.).
+- **Unknown Members** â€” missing lookups map to surrogate key `0` to preserve referential integrity.
+- **Atomic Transactions** â€” all ETL runs under transactional control with error handling.
 
 ---
 
-## 🧱 Schema Layers
+## ðŸ§± Schema Layers
 
-| Layer | Schema | Responsibility |
+| Schema | Type | Responsibility |
 |---|---|---|
-| **Staging** | `stage` | Raw extracted source tables; temporary holding area |
-| **Dimension** | `dds` / `dbo` | Clean, standardized master entities and outrigger dimensions |
-| **Fact** | `dds` / `dbo` | Atomic business transactions at Order Line granularity |
+| `stg` | Staging | Stores raw extracted source data |
+| `dim` | Dimension | Stores descriptive attributes for analysis |
+| `fact` | Fact | Stores measurable business transactions |
+| `etl` | Operational | Stores ETL logs and execution metadata |
 
 ---
 
-## 📚 Core Tables & Dimensions
+## ðŸ“š Core Tables
 
-### Dimension Tables
+### Dimensions
 
-- **`Dim_Geography`** — Common geographical attributes (`geography_key`, `country`, `region`, `city`, `postal_code`).
-- **`Dim_Customer`** — Customer profiles and contacts (`customer_key`, `customer_id`, `customer_name`, `geography_key`).
-- **`Dim_Supplier`** — Vendor details (`supplier_key`, `supplier_id`, `supplier_name`, `contact_name`, `geography_key`).
-- **`Dim_Product`** — Product catalog details (`product_key`, `product_id`, `product_name`, `category_name`, `unit_price`, `supplier_key`).
-- **`Dim_Employee`** — Sales representatives (`employee_key`, `employee_id`, `first_name`, `last_name`, `title`, `geography_key`).
-- **`Dim_Shipper`** — Logistics carriers (`shipper_key`, `shipper_id`, `shipper_name`, `phone`).
-- **`Dim_Date`** — Shared enterprise calendar (`MiladiDateKey`, `MiladiDate`, `ShamsiDate`, `Year`, `Month`, `Day`, `Quarter`, `DayOfWeek`).
+- **`dim.Product`** â€” product attributes, including denormalized category and brand.
+- **`dim.Customer`** â€” customer attributes and location.
+- **`dim.Date`** â€” reusable calendar dimension.
 
-### Fact Table
+### Fact
 
-- **`Fact_Order`**
-  - **Grain:** One row per Order ID + Product ID.
-  - **Metrics & Measures:** `quantity`, `unit_price`, `discount_amount`, `freight_amount`, `total_amount`.
-  - **Role-playing Keys:** `order_date_key`, `required_date_key`, `shipped_date_key`.
+- **`fact.Sales`** â€” grain is one row per order line, with quantity, price, and amount calculations.
+
+### Staging
+
+- **`stg.SalesOrder`**, `stg.Customer`, `stg.Product` â€” raw source snapshots.
 
 ---
 
-## 🔧 ETL Pipeline
+## ðŸ”§ ETL Pipeline
 
 ### Load Sequence
 
-1. Truncate / Ingest source data into Staging tables.
-2. Load Outrigger dimension: `Dim_Geography`.
-3. Load primary dimensions: `Dim_Date`, `Dim_Supplier`, `Dim_Customer`, `Dim_Employee`, `Dim_Shipper`.
-4. Load dependent dimension: `Dim_Product` (resolving `supplier_key`).
-5. Resolve all surrogate keys and insert into `Fact_Order`.
+1. Load staging tables from source.
+2. Clean and validate incoming records.
+3. Load dimension tables.
+4. Resolve surrogate keys.
+5. Load the fact table.
+6. Write execution logs.
 
 ### Standard Cleansing Pattern
 
@@ -127,7 +128,7 @@ SET XACT_ABORT ON;
 BEGIN TRY
     BEGIN TRANSACTION;
 
-    -- Staging / Dimension / Fact ETL Load logic
+    -- ETL operations here
 
     COMMIT TRANSACTION;
 END TRY
@@ -140,72 +141,87 @@ END CATCH;
 
 ---
 
-## 📊 Key Business KPIs
+## ðŸ“Š KPI Examples
 
-| KPI | Description |
+| KPI | Formula |
 |---|---|
-| **Gross Sales Amount** | Total sales volume before deductions and discounts |
-| **Net Sales Amount** | Revenue realized after discount deductions |
-| **Total Freight** | Total logistics and freight costs |
-| **Order Line Volume** | Count of distinct transactional items processed |
+| **Gross Sales** | `SUM(GrossAmount)` |
+| **Net Sales** | `SUM(NetAmount)` |
+| **Total Discount** | `SUM(DiscountAmount)` |
+| **Total Quantity Sold** | `SUM(Quantity)` |
+| **Order Count** | `COUNT(DISTINCT OrderKey)` |
 
 ---
 
-## 🧰 Prerequisites
+## âœ… Data Quality
 
-- **Microsoft SQL Server** (2019 or later recommended)
-- SQL Server Management Studio (SSMS) or Azure Data Studio
-- Northwind sample database
+The pipeline includes validation queries for:
+
+- Duplicate source lines
+- Invalid or negative quantities
+- Inconsistent financial calculations
+- Orphan fact records
+- Unknown member mapping rates
 
 ---
 
-## 🚀 Getting Started
+## ðŸ§° Prerequisites
+
+- **Microsoft SQL Server** (2019+ recommended)
+- SQL Server Management Studio (or equivalent)
+- Permission to create databases, schemas, tables, and stored procedures
+
+---
+
+## ðŸš€ Getting Started
 
 ### 1. Clone the repository
 
+```bash
+git clone https://github.com/your-org/sales-dwh.git
+cd sales-dwh
 ```
 
-### 2. Prepare Source Database
+### 2. Create the database and schema
 
-Execute the script inside `dataset/NorthWind.txt` to initialize the Northwind operational database.
+Execute the DDL scripts under `sql/schema` against your target SQL Server instance.
 
-### 3. Deploy Staging & DDL
+### 3. Deploy the ETL procedures
 
-Execute the scripts located in `scripts/`:
+Execute the stored procedures under `sql/etl`. Each procedure adopts the full load strategy.
 
-- `Stage_CreateTables.sql`
-- `DDS_northwind_sale_createTables.sql`
-
-### 4. Run the ETL Procedures
-
-Execute ETL stored procedures in dependency order:
+### 4. Run the pipeline
 
 ```sql
-EXEC dbo.Stage_sp_LoadStage;
-EXEC dbo.DDS_Usp_load_dim_northwind;
-EXEC dbo.Usp_load_fact_order_full;
+EXEC etl.usp_load_dim_northwind;
+EXEC etl.usp_load_fact_order_full;
 ```
 
----
+### 5. Validate
 
-## 📖 Documentation
-
-Additional technical specifications are available in `documents/`:
-
-- **Architecture Blueprint:** Detailed physical design in `Northwind_Data_Warehouse_Architecture_Blueprint.pdf`.
-- **Data Flow Diagrams:** Visual flow representations in `Data Flow.drawio.pdf`.
-- **Data Catalog:** Data dictionary, field types, and business definitions.
+Run the validation queries under `sql/quality` to confirm data integrity.
 
 ---
 
-## 🛠️ Roadmap
+## ðŸ“– Documentation
 
-- [ ] Add automated monitoring and data testing.
-- [ ] Add Slowly Changing Dimensions (SCD Type 2) support.
-- [ ] Build connected Power BI executive dashboards.
+| Document | Purpose |
+|---|---|
+| `DATA_CATALOG.md` | Complete metadata, definitions, and business rules |
 
 ---
 
-## 👤 Maintainer
+## ðŸ› ï¸ Roadmap
 
-**sahar teimouri** — Data Analyst &Data scientist  
+- [ ] Add incremental load support for large-volume tables
+- [ ] Introduce Slowly Changing Dimension (SCD) Type 2 for history
+- [ ] Add automated monitoring in Grafana / Loki
+- [ ] Publish curated reporting views
+- [ ] Add CI checks for schema drift
+
+---
+
+## ðŸ‘¤ Maintainers
+
+**sahar teimouri** ” Data analyst & Data scientist 
+
